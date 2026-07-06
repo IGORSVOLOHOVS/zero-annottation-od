@@ -1,0 +1,46 @@
+# Data & generated artifacts
+/images/
+/images.zip
+/labels_raw.json
+/dataset/
+/runs/
+*.pt
+*.gguf
+*.onnx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Legacy/scratch scaffolding, not part of the project
+scratch/
+.benchmarks/
+
+# Downloaded llama.cpp release binaries (see README for how to fetch these)
+llama_cpp_bin/
+llama_server_smoke.log
+llama_diag.log
+full_pipeline_run*.log
+
+# Claude Code session-local state, not part of the project
+.claude/
+
+# Pre-existing scratch/debug artifacts, not part of the delivered project
+all_code.py
+output.txt

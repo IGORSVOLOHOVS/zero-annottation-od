@@ -1,0 +1,84 @@
+# Default configuration for the Zero-Annotation-OD pipeline.
+# Override any value with --config path/to/your.yaml or --set key=value on the CLI.
+
+seed: 42
+
+paths:
+  images_dir: images
+  image_glob: "hard_hat_workers*.png"
+  labels_raw_path: labels_raw.json
+  dataset_dir: dataset
+  runs_dir: runs
+
+labeling:
+  class_map:
+    helmet: 0
+    no_helmet: 1
+  system_prompt: |
+    You are a precise object detection annotator.
+    For each person visible in the image, determine if they are wearing a safety helmet or not.
+    Return a JSON array of objects. Each object must have:
+    - "label": "helmet" or "no_helmet"
+    - "bbox": [x_min, y_min, x_max, y_max] in pixel coordinates
+
+    CRITICAL RULES:
+    1. The bounding box MUST cover ONLY THE HEAD / HELMET of the person. Do NOT draw the box around their entire body!
+    2. Coordinates must be integers within image bounds.
+    3. If no people are visible, return an empty array: []
+    4. Do NOT include objects that are not people.
+    5. The key MUST be exactly "bbox", not "bbox_2d" or any other name.
+    6. Output ONLY valid JSON, no extra text. Example: [{"label": "helmet", "bbox": [120, 45, 160, 90]}]
+  user_prompt: "Detect all people and classify helmet/no_helmet. Return JSON array."
+  temperature: 0.1
+  max_tokens: 512
+  checkpoint_every: 20
+
+# Local VLM backend. We use llama.cpp's prebuilt llama-server binary (not
+# llama-cpp-python) because it ships ready-to-run CUDA binaries for Windows,
+# with no compiler/toolchain needed. See README.md for the reasoning and the
+# known accuracy trade-off of running a quantized VLM for bbox grounding.
+llama_cpp:
+  server_binary: llama-server # must be on PATH, or set an absolute path
+  host: 127.0.0.1
+  port: 8090
+  # Preferred: let llama-server pull the model straight from Hugging Face.
+  # It auto-selects the matching mmproj file for ggml-org quantized repos.
+  hf_repo: "ggml-org/Qwen2.5-VL-3B-Instruct-GGUF"
+  hf_quant: "Q4_K_M" # safe default for 6-8GB GPUs; use Q8_0/F16 for more VRAM, Q4_0 for CPU-only
+  # Alternative: point at local files instead of downloading via hf_repo.
+  model_path: null
+  mmproj_path: null
+  n_gpu_layers: -1 # -1 = offload everything to GPU; set to 0 to force CPU-only
+  ctx_size: 4096
+  # llama.cpp's own startup warning for Qwen-VL: grounding/bbox accuracy degrades
+  # badly below 1024 image tokens. Don't lower this even to save VRAM/speed.
+  image_min_tokens: 1024
+  startup_timeout_s: 240
+  request_timeout_s: 120
+  extra_server_args: []
+
+dataset:
+  val_split: 0.2
+  min_box_frac: 0.005
+  max_box_frac: 0.95
+  # Drop near-identical repeat detections (same label, IoU above this). null disables.
+  dedup_iou_threshold: 0.9
+  # Crop boxes taller than width * this ratio to a top-anchored square, as an
+  # approximate fix for the VLM defaulting to full-body boxes for no_helmet.
+  # null disables. See README "Data-quality findings" for why this exists.
+  head_crop_max_aspect_ratio: 1.8
+
+train:
+  base_weights: yolov8n.pt
+  epochs: 50
+  imgsz: 640
+  batch: 16
+  patience: 10
+  device: auto # auto | cpu | 0 | 0,1 ...
+  experiment_name: helmet_detection
+
+evaluate:
+  conf: 0.25
+  iou: 0.5
+  device: auto
+  fp_fn_examples: 4

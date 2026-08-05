@@ -47,9 +47,7 @@ SRC = ROOT / "src"
 
 
 def run(*cmd: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace"
-    )
+    return subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
 
 
 def measure_tests() -> Metric:
@@ -114,9 +112,7 @@ def measure_maintainability() -> Metric:
 
     mi_scores = []
     if mi.returncode == 0 and mi.stdout.strip():
-        mi_scores = [
-            v["mi"] for v in json.loads(mi.stdout).values() if isinstance(v, dict) and "mi" in v
-        ]
+        mi_scores = [v["mi"] for v in json.loads(mi.stdout).values() if isinstance(v, dict) and "mi" in v]
 
     violations = 0
     if lint.stdout.strip():
@@ -141,9 +137,7 @@ def measure_maintainability() -> Metric:
 
 def measure_portability() -> Metric:
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    requires = (
-        m.group(1) if (m := re.search(r'requires-python\s*=\s*"([^"]+)"', pyproject)) else "?"
-    )
+    requires = m.group(1) if (m := re.search(r'requires-python\s*=\s*"([^"]+)"', pyproject)) else "?"
     ci = ROOT / ".github" / "workflows" / "ci.yml"
     ci_text = ci.read_text(encoding="utf-8") if ci.is_file() else ""
     operating_systems = sorted(set(re.findall(r"(ubuntu|windows|macos)-latest", ci_text)))

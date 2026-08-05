@@ -2,12 +2,21 @@ name: Python CI
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches: [release, dev, test]
   pull_request:
-    branches: ["main", "dev"]
+    branches: [release, dev, test]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build_and_test:
+    name: Lint and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,3 +41,26 @@ jobs:
 
       - name: Test (Pytest)
         run: pytest --cov=src/zeod --cov-report=xml
+
+  security:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # gitleaks needs history, not just the tip
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  branch-policy:
+    name: Only release, dev and test may exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/enforce_branch_policy.py --remote origin

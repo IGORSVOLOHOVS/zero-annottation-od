@@ -1,0 +1,67 @@
+# Point 13: tagging a version produces something a person can download -
+# a Windows .exe and a cross-platform .zip, attached to a GitHub Release.
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build, e.g. v1.2.3"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }} artefact
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - name: Install CPU-only torch
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -e ".[dev,release]"
+
+      - name: Verify before packaging
+        run: pytest
+
+      - name: Build artefact
+        run: python scripts/build_release_artifact.py --version "${{ github.ref_name }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artefact-${{ matrix.os }}
+          path: release/*
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artefacts
+      - name: Collect files
+        run: |
+          mkdir -p release
+          find artefacts -type f \( -name '*.zip' -o -name '*.exe' -o -name '*.sha256' \) \
+            -exec cp {} release/ \;
+          ls -la release
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          body_path: CHANGELOG.md
+          fail_on_unmatched_files: true

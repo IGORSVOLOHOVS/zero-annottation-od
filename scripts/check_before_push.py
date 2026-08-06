@@ -82,6 +82,15 @@ def _command_on(line: str) -> list[str] | None:
     return tokens if tokens and tokens[0] in TOOLS else None
 
 
+def read_workflows() -> str:
+    """Every workflow file, concatenated. Read once and passed where needed."""
+    if not WORKFLOWS.is_dir():
+        return ""
+    return "\n".join(
+        path.read_text(encoding="utf-8", errors="replace") for path in sorted(WORKFLOWS.glob("*.y*ml"))
+    )
+
+
 def ci_commands() -> list[list[str]]:
     """Every lint, type-check and test command this repository's CI runs."""
     found: list[list[str]] = []
@@ -108,13 +117,39 @@ def localise(command: list[str]) -> list[str] | None:
     return command
 
 
-def not_our_fault(output: str) -> str:
+INSTALL_STEPS = (
+    "pip install -e",
+    "pip install .",
+    "uv sync",
+    "poetry install",
+    "setup.py develop",
+    "setup.py install",
+    "pip install --editable",
+)
+
+
+def ci_installs_the_package(text: str) -> bool:
+    """Does any workflow install this project before testing it?
+
+    The answer decides whether a local ModuleNotFoundError is noise or a
+    warning. Where CI runs `pip install -e .` the package is importable there
+    and not here, so blocking a push would be a false alarm. Where CI installs
+    nothing, the tests import the project straight from the checkout - exactly
+    as they just failed to do here - and the runner is about to hit the same
+    wall.
+    """
+    return any(step in text for step in INSTALL_STEPS)
+
+
+def not_our_fault(output: str, workflows_text: str) -> str:
     """Why a test run failed for a reason a push cannot fix.
 
-    The runner installs the package before testing; this machine usually has
-    not. Blocking a push on that is a false alarm, and a hook that cries wolf
-    gets bypassed with --no-verify until it stops being read at all.
+    A hook that cries wolf gets bypassed with --no-verify until it stops being
+    read at all; a hook that waves failures through is worse, because it says
+    "safe to push" and the runner then says otherwise.
     """
+    if not ci_installs_the_package(workflows_text):
+        return ""
     # "1 error during collection" but "2 errors during collection" - matching
     # the singular alone silently missed every repository with more than one
     # failing test module, which is most of them.
@@ -125,10 +160,43 @@ def not_our_fault(output: str) -> str:
     return ""
 
 
-def run(command: list[str], *, quiet: bool) -> bool | None:
+def as_ci_invokes_it(command: list[str]) -> list[str]:
+    """The command spelled the way a CI step spells it.
+
+    This is not cosmetic. `python -m pytest` puts the working directory on
+    sys.path; the `pytest` console script does not. A repository whose code
+    sits at the top level therefore imports fine under `-m` and fails with
+    ModuleNotFoundError under the bare script - which is what CI runs. Checking
+    the easier of the two is worse than not checking at all, because it reports
+    success and the runner then reports failure.
+
+    The console script beside this interpreter is preferred over one merely on
+    PATH, so a machine with several Pythons still tests the one in use. `-P`
+    (3.11+) reproduces the same import behaviour when no script exists.
+    """
+    tool = command[0]
+    scripts = Path(sys.executable).parent
+    for candidate in (
+        scripts / "Scripts" / f"{tool}.exe",
+        scripts / f"{tool}.exe",
+        scripts / "bin" / tool,
+        scripts / tool,
+    ):
+        if candidate.is_file():
+            return [str(candidate), *command[1:]]
+
+    found = shutil.which(tool)
+    if found:
+        return [found, *command[1:]]
+    if sys.version_info >= (3, 11):
+        return [sys.executable, "-P", "-m", *command]
+    return [sys.executable, "-m", *command]
+
+
+def run(command: list[str], *, quiet: bool, workflows_text: str = "") -> bool | None:
     """True passed, False failed, None could not be judged on this machine."""
     proc = subprocess.run(
-        [sys.executable, "-m", *command],
+        as_ci_invokes_it(command),
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -142,7 +210,7 @@ def run(command: list[str], *, quiet: bool) -> bool | None:
         return True
 
     output = proc.stdout + proc.stderr
-    if command[0] == "pytest" and (reason := not_our_fault(output)):
+    if command[0] == "pytest" and (reason := not_our_fault(output, workflows_text)):
         print(f"  skip {label} - {reason}")
         return None
 
@@ -182,6 +250,7 @@ def main() -> int:
     if args.install_hook:
         return install_hook()
 
+    workflows_text = read_workflows()
     commands = ci_commands()
     if not commands:
         print("CI here runs no lint or test steps - nothing to check")
@@ -194,7 +263,7 @@ def main() -> int:
         if local is None:
             print(f"  skip {' '.join(command)} (not installed here)")
             continue
-        verdict = run(local, quiet=args.quiet)
+        verdict = run(local, quiet=args.quiet, workflows_text=workflows_text)
         if verdict is not None:
             results.append(verdict)
 

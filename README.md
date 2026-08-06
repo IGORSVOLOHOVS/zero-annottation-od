@@ -70,6 +70,44 @@ Each stage is a separate, resumable CLI command (`zeod label|build-dataset|train
 backed by config in one YAML file — no notebook cell has to run in a
 particular order to reproduce results.
 
+## Performance
+
+Wall-clock time belongs to the VLM and to YOLO training, both of which depend on
+the GPU rather than on this code. What is measured here is the per-image work
+around the model — `benchmarks/test_labeling_performance.py`, median of many
+rounds:
+
+| What is measured | Median |
+| --- | ---: |
+| `smart_resize` — fit an image to the VLM patch grid | 405 ns |
+| Parse a response containing no JSON at all | 1.9 µs |
+| Deduplicate 4 detections | 3.9 µs |
+| Parse 16 detections | 30.6 µs |
+| Parse 16 detections wrapped in a markdown fence | 31.7 µs |
+| Deduplicate 128 detections that all collapse to one | 81.1 µs |
+| Deduplicate 32 distinct detections | 229.0 µs |
+| Train/val split of 10,000 items | 1.70 ms |
+| Deduplicate 128 distinct detections | 3.60 ms |
+
+The shape worth knowing is `_dedup_by_iou`. It compares each detection against
+every one already kept, so cost grows with the **square** of the count: 4 → 32
+detections is 8× the input for 59× the time; 32 → 128 is 4× the input for 16×
+the time. At four boxes per photo that is 4 µs and irrelevant. On a crowded site
+at 128 boxes it is 3.6 ms per image — still small beside a VLM call, but it
+would become the bottleneck the moment the model were replaced by something
+fast.
+
+The collapsing case costs 81 µs against 3.60 ms for the same count of distinct
+boxes, because a box matching an early neighbour exits the comparison
+immediately. Real photos sit between the two.
+
+Being forgiving about model output is nearly free: stripping a markdown fence
+adds ~1 µs to a 31 µs parse, about 3 %.
+
+```bash
+pytest benchmarks --benchmark-only
+```
+
 ## Why llama.cpp instead of vLLM
 
 vLLM has no native Windows support (Linux/WSL2 only), which was the original

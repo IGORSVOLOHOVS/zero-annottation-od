@@ -48,7 +48,7 @@ jobs:
     # Only a tag makes a release. A manual run still builds and uploads the
     # artefacts, which is the useful half, but does not publish anything -
     # softprops/action-gh-release needs a tag and fails without one.
-    if: startsWith(github.ref, \'refs/tags/\')
+    if: startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: ubuntu-latest
     steps:

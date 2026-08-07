@@ -24,7 +24,6 @@ by using a vision-language model as an automatic annotator, then training a
 conventional, fast, deployable object detector (YOLOv8) on its output.
 
 It started as a Yandex Practicum computer-vision capstone (task brief in
-[`docs/task.txt`](docs/task.txt)) built around a cloud Linux GPU VM running
 [vLLM](https://github.com/vllm-project/vllm) for the labeling step. This
 version replaces that with **[llama.cpp](https://github.com/ggml-org/llama.cpp)**
 and runs entirely locally on Windows — no cloud VM, no Linux, no vLLM.

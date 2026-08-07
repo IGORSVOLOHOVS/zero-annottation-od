@@ -127,6 +127,11 @@ def localise(command: list[str]) -> list[str] | None:
 INSTALL_STEPS = (
     "pip install -e",
     "pip install .",
+    # A workflow that installs a requirements file is installing the project's
+    # dependencies just as surely as one that installs the package. Leaving this
+    # out made the hook report "CI would fail" on three repositories whose only
+    # problem was a dependency this machine does not have and the runner does.
+    "pip install -r",
     "uv sync",
     "poetry install",
     "setup.py develop",
@@ -175,6 +180,12 @@ def not_our_fault(output: str, workflows_text: str) -> str:
     # failing test module, which is most of them.
     if "ModuleNotFoundError" in output and "during collection" in output:
         return "the package is not installed here; CI installs it before testing"
+    # A library refusing to work because an optional extra is missing is the
+    # same situation wearing different words: python-telegram-bot raises
+    # RuntimeError rather than ImportError when [rate-limiter] is absent, and
+    # the runner has it because requirements.txt pins it.
+    if "must be installed via" in output and "pip install" in output:
+        return "an optional extra is missing here; CI installs it before testing"
     if "Required test coverage" in output and "Total coverage: 0.00%" in output:
         return "coverage measured nothing because the package is not installed here"
     return ""
@@ -208,9 +219,15 @@ def as_ci_invokes_it(command: list[str]) -> list[str]:
     found = shutil.which(tool)
     if found:
         return [found, *command[1:]]
-    if sys.version_info >= (3, 11):
-        return [sys.executable, "-P", "-m", *command]
-    return [sys.executable, "-m", *command]
+    # `-P` is what makes this fallback as strict as the console script, and it
+    # arrived in 3.11. Asked as a capability rather than as a version number on
+    # purpose: this file is copied into repositories with different
+    # requires-python values, and a literal `sys.version_info >= (3, 11)` is
+    # reported as an outdated version block by every one of them that requires
+    # 3.11 or later. sys.flags.safe_path is the flag `-P` sets, so its presence
+    # is the same question asked in a way that travels.
+    safe_path = ["-P"] if hasattr(sys.flags, "safe_path") else []
+    return [sys.executable, *safe_path, "-m", *command]
 
 
 def run(command: list[str], *, quiet: bool, workflows_text: str = "") -> bool | None:

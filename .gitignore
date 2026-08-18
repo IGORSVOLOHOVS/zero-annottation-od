@@ -21,6 +21,10 @@ dist/
 .mypy_cache/
 htmlcov/
 .coverage
+# Cobertura report written by `pytest --cov`. It was tracked, so every local
+# test run showed up as a diff whose only content was a fresh timestamp and
+# the absolute path of whichever directory the run happened in.
+coverage.xml
 
 # Editors / OS
 .vscode/*

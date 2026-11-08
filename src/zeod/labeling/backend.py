@@ -18,6 +18,7 @@ import subprocess
 import time
 from collections.abc import Callable
 from pathlib import Path
+from typing import Self
 
 import requests
 
@@ -32,7 +33,7 @@ _MIME_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
 class VLMBackend(abc.ABC):
     """Minimal interface a labeling backend must implement."""
 
-    def __enter__(self) -> VLMBackend:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *exc_info: object) -> None:

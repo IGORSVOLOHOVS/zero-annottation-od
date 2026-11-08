@@ -7,7 +7,7 @@ its output into YOLO format, and a YOLOv8 detector is fine-tuned on the
 result — an end-to-end, fully local, zero-manual-annotation pipeline for
 construction-site PPE compliance detection.
 
-![Python](https://img.shields.io/badge/python-3.10--3.13-blue)
+![Python](https://img.shields.io/badge/python-3.13-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Tests](https://img.shields.io/badge/tests-60%20passing-brightgreen)
@@ -177,33 +177,27 @@ legacy/                       Original vLLM-based script/notebooks, kept for ref
 
 ## Installation (Windows)
 
-Requires Python 3.10-3.13.
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.13. `pyproject.toml` and
+`uv.lock` pin every dependency, including the development tools.
 
 ```powershell
-py -3.13 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-pip install -e ".[dev]"
-
-# GPU users only: `pip install -e .` above pulls in whatever CPU/GPU torch
-# wheel pip resolves to (usually CPU-only from plain PyPI), and it may
-# silently win over an earlier CUDA install even if you installed torch
-# first. Force the CUDA build back in as the LAST step, matching your driver
-# (check `nvidia-smi` for your CUDA version; cu124 works for CUDA 12.x
-# drivers). Verified working pair on an RTX 3060 Ti: torch 2.6.0+cu124 /
-# torchvision 0.21.0+cu124.
-pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124 --force-reinstall --no-deps
+uv sync --frozen
 ```
 
-If you don't have an NVIDIA GPU, skip the last command — the CPU wheel from
-the first `pip install -e ".[dev]"` works fine, just slower (see the timing
-table below).
-
-Verify GPU is visible to torch (optional):
+That installs PyPI's CPU build of torch. GPU users replace it with the CUDA build
+matching their driver (check `nvidia-smi`; cu124 works for CUDA 12.x drivers):
 
 ```powershell
-python -c "import torch; print(torch.cuda.is_available())"
+uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124 --force-reinstall --no-deps
 ```
+
+A later `uv sync` puts the CPU build back. Verify the GPU is visible to torch (optional):
+
+```powershell
+uv run --frozen python -c "import torch; print(torch.cuda.is_available())"
+```
+
+`docs/install.md` has the same steps in short.
 
 ### llama.cpp binary
 
@@ -227,6 +221,9 @@ Every command reads `configs/default.yaml` by default; override with
 `--config path/to/other.yaml` or ad hoc with `--set key.path=value`. Both go
 **before** the subcommand: `python -m zeod.cli --set train.epochs=5 train`.
 
+From a clone, `.\recipe.ps1 run <arguments>` runs `python -m zeod.cli` with `src`
+on the path, so every `python -m zeod.cli` below can be written that way.
+
 ```powershell
 # 1. Auto-label images/ with the local VLM (resumable; checkpoints labels_raw.json every 20 images)
 python -m zeod.cli label
@@ -249,8 +246,8 @@ python -m zeod.cli infer "images/hard_hat_workers9*.png" --output runs/infer_out
 python -m zeod.cli pipeline
 ```
 
-(`zeod` is also installed as a console script, so `zeod label` etc. work
-the same as `python -m zeod.cli label` after `pip install -e .`.)
+(The wheel that `.\recipe.ps1 build` writes to `dist\` installs `zeod` as a console
+script, so `zeod label` etc. work the same as `python -m zeod.cli label`.)
 
 ### Expected time / VRAM per stage (RTX 3060 Ti, 8GB VRAM, 992 images)
 
@@ -349,15 +346,19 @@ python -m zeod.cli --set train.device=cpu train
 ## Tests
 
 ```powershell
-pytest
+.\recipe.ps1 test
 ```
 
-60 tests, all GPU-free and network-free: bbox conversion/clamping/dedup/
+That runs pytest with its coverage floor, mypy, ruff check and ruff format, as the
+pipeline does. The suite is GPU-free and network-free: bbox conversion/clamping/dedup/
 head-crop, VLM response parsing (including malformed/empty responses and
 grid-coordinate rescaling), deterministic train/val split, generated YOLO
 label validity, config loading/overrides, an end-to-end pipeline smoke test
-using a mock VLM backend, and a self-healing-backend recovery test — no
+using a mock VLM backend, and a self-healing-backend recovery test - no
 llama-server process or model download required to run the suite.
+
+`benchmarks/` is not part of it; run it by hand with
+`uv run --frozen python -m pytest benchmarks --no-cov`.
 
 ## What's in `legacy/`
 

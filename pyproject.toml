@@ -1,48 +1,101 @@
+# pyproject.toml - Python's own file for zero-annottation-od.
+#
+# It pins the toolchain. `recipe.ps1 test` runs pytest, mypy, ruff check and ruff
+# format, and every setting those four read is here. There are no task-runner
+# sections: the recipe's verbs are the tasks.
+
 [build-system]
-requires = ["hatchling"]
+# Pinned with a version, not a bare name: an unpinned backend changes what
+# `recipe.ps1 build` produces without anyone editing this file.
+requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "zeod"
-version = "0.2.0"
-description = "Zero-Annotation-OD: VLM-based auto-labeling + YOLOv8 helmet detection, fully local on Windows"
+# This must equal $Version in recipe.ps1: `recipe.ps1 test` fails when they disagree.
+version = "1.1.0"
+description = "Console tool that auto-labels helmet images with a local vision-language model and trains a YOLOv8 detector on them."
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
 license = { text = "MIT" }
-
+requires-python = ">=3.13,<3.14"
+# What src/zeod imports, as before the lab. ultralytics brings torch; PyPI's Windows
+# wheel of torch is the CPU build, so the runner never fetches a CUDA stack. torch is
+# held to the pair the lab's other projects already lock, so the runner's cache serves it.
 dependencies = [
     "ultralytics>=8.3.0,<9",
+    "torch==2.11.0",
+    "torchvision==0.26.0",
     "pydantic>=2.7,<3",
     "pyyaml>=6.0,<7",
     "requests>=2.31,<3",
     "numpy>=1.26,<3",
-    "pillow>=10.0,<12",
+    "pillow>=10.0,<13",
     "tqdm>=4.66,<5",
 ]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0,<9",
-    "pytest-cov>=5.0,<6",
-    "ruff>=0.6,<1",
-    "radon>=6.0",
-    "pytest-benchmark>=4.0",
-]
-release = ["pyinstaller>=6.0"]
 
 [project.scripts]
 zeod = "zeod.cli:main"
 
+[dependency-groups]
+# `uv run` installs this group by default, so test.yaml's Runner health step finds
+# ruff, pytest and mypy through `uv run --frozen <tool> --version`.
+# pytest-benchmark is here for benchmarks/, which runs by hand and not in `test`.
+dev = [
+    "ruff==0.16.1",
+    "mypy==2.3.0",
+    "pytest==8.4.2",
+    "pytest-cov==5.0.0",
+    "coverage==7.15.2",
+    "pytest-benchmark==5.1.0",
+    "types-pyyaml==6.0.12.20250915",
+    "types-requests==2.32.4.20250913",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/zeod"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
+[tool.uv]
+# The tests and `recipe.ps1 run` use the source tree, so uv does not install the project.
+package = false
 
 [tool.ruff]
+# Ruff refuses to run at all when its own version is not this one.
+required-version = "0.16.1"
+target-version = "py313"
 line-length = 115
-target-version = "py310"
-extend-exclude = ["legacy", "scratch", "notebooks"]
+# legacy/ is earlier agent scaffolding, not this project's code. Section 7 prints
+# .claude/, tests/manual/serve.py and tools/wiki.py verbatim.
+extend-exclude = ["legacy", "scratch", "notebooks", ".claude", "tests/manual/serve.py", "tools/wiki.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.format]
+line-ending = "lf"
+# Section 7 prints these files verbatim, so the formatter must not touch them.
+exclude = [".claude/**", "tests/manual/serve.py", "tools/wiki.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+# The package sits under src/, so src goes on sys.path however pytest is started.
+pythonpath = ["src", "."]
+# Measured on adoption: 387 of 722 statements of src/zeod, 53.6%. The floor is the whole
+# number below. cli.py, train.py, evaluate.py, infer.py and device.py drive ultralytics,
+# torch and a llama.cpp server, which no test starts (R-12 issue).
+addopts = "-q --cov=src/zeod --cov-report=term --cov-fail-under=53"
+
+[tool.coverage.run]
+source = ["src/zeod"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["src/zeod", "tools"]
+mypy_path = "src"
+explicit_package_bases = true
+
+# THE SILENCE LIST, measured on adoption: it only ever gets shorter (R-12).
+# 1 name, third-party: tqdm ships no types. None of this repository's own modules is silenced.
+[[tool.mypy.overrides]]
+module = ["tqdm.*"]
+ignore_missing_imports = true

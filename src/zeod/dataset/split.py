@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import random
-from typing import TypeVar
-
-T = TypeVar("T")
 
 
-def train_val_split(items: list[T], val_split: float, seed: int) -> tuple[list[T], list[T]]:
+def train_val_split[T](items: list[T], val_split: float, seed: int) -> tuple[list[T], list[T]]:
     """Shuffle ``items`` with a seeded RNG and split off ``val_split`` fraction.
 
     Same (items, val_split, seed) always yields the same split - the RNG is

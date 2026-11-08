@@ -32,7 +32,7 @@ def run_inference(
     for img_path in image_paths:
         results = model.predict(str(img_path), conf=conf, device=resolved_device, verbose=False)
         out_path = output_dir / img_path.name
-        results[0].save(filename=str(out_path))
+        results[0].save(filename=str(out_path))  # type: ignore[index, union-attr]
         saved_paths.append(out_path)
 
     logger.info("Saved %d annotated images to %s", len(saved_paths), output_dir)

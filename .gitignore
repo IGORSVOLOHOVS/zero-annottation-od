@@ -1,50 +1,29 @@
-# Data & generated artifacts
-/images/
-/images.zip
-/labels_raw.json
-/dataset/
-/runs/
-*.pt
-*.gguf
-*.onnx
+# Built, fetched and scratch - only ever at the root
+/dist/
+/build/
+/out/
+/tmp/
+/.venv/
+/.coverage
 
-# Python
+# What the tools cache, wherever they run
 __pycache__/
 *.pyc
-.venv/
-venv/
-*.egg-info/
-build/
-dist/
 .pytest_cache/
-.ruff_cache/
 .mypy_cache/
-htmlcov/
+.ruff_cache/
+
+# Prompt text, and one person's Claude Code settings
+.claude/logs/
+.claude/settings.local.json
+
+# No .env line: .claude/.env holds the keys and is committed on purpose (R-02).
+# DEVIATION from the line above, decided by the repository owner: no key is
+# ever committed, so .claude/.env is ignored here. Rule 4 of CLAUDE.md is
+# where that reversal is written down.
+.claude/.env
+
+# What this repository writes, kept from before the lab
+.env
 .coverage
-# Cobertura report written by `pytest --cov`. It was tracked, so every local
-# test run showed up as a diff whose only content was a fresh timestamp and
-# the absolute path of whichever directory the run happened in.
-coverage.xml
-
-# Editors / OS
-.vscode/*
-!.vscode/extensions.json
-.DS_Store
-Thumbs.db
-
-# Legacy/scratch scaffolding, not part of the project
-scratch/
-.benchmarks/
-
-# Downloaded llama.cpp release binaries (see README for how to fetch these)
-llama_cpp_bin/
-llama_server_smoke.log
-llama_diag.log
-full_pipeline_run*.log
-
-# Claude Code session-local state, not part of the project
-.claude/
-
-# Pre-existing scratch/debug artifacts, not part of the delivered project
-all_code.py
-output.txt
+*.egg-info/

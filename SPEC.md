@@ -4,6 +4,30 @@ This specification was reverse-engineered from the code at commit `52ceef6` (`or
 Each requirement records behaviour that the code implements, the file it comes from, and the test that checks
 it, if one exists. Claims found only in documents are listed separately. Paths are relative to the repository root.
 
+<!-- jira-sync:start -->
+Jira: KAN-76
+
+## Tasks
+
+This list is one ticket in Jira project KAN, [KAN-76](https://igorsvolohovs.atlassian.net/browse/KAN-76). Each line is a checkbox there: tick it in Jira and the sync ticks it here; add a checkbox there and it is appended here. Done items are the features described in section 3; open items are what the project declares but the code does not do yet.
+
+- [x] Configuration (section 3.1) <!-- spec-configuration -->
+- [x] Command-line interface (section 3.2) <!-- spec-command-line-interface -->
+- [x] Auto-labeling (section 3.3) <!-- spec-auto-labeling -->
+- [x] Dataset building (section 3.4) <!-- spec-dataset-building -->
+- [x] Training, evaluation, inference (section 3.5) <!-- spec-training-evaluation-inference -->
+- [x] Repository tooling (section 3.6) <!-- spec-repository-tooling -->
+- [ ] Device selection picks "CUDA, MPS or CPU" (declared, not implemented) <!-- spec-device-selection-picks-cuda-mps-or-cpu -->
+- [ ] Switching to MiniCPM-V or Moondream2 needs only `hf_repo` and the prompt; "the rest of the pipeline ... is model-agnostic" (declared, not implemented) <!-- spec-switching-to-minicpm-v-or-moondream2-needs-only-hf -->
+- [ ] Self-consistency labeling (2-3 passes, vote) and two-stage person-then-head grounding (declared, not implemented) <!-- spec-self-consistency-labeling-2-3-passes-vote-and-two- -->
+- [ ] `.github/workflows/branch-policy.yml`, weekly run (declared, not implemented) <!-- spec-github-workflows-branch-policy-yml-weekly-run -->
+- [ ] Scheduled secret scan; ruff `flake8-bandit` rules (declared, not implemented) <!-- spec-scheduled-secret-scan-ruff-flake8-bandit-rules -->
+- [ ] gitleaks and `detect-private-key` in pre-commit; ruff `S`; `requirements-dev.lock`; `ci.yml` (declared, not implemented) <!-- spec-gitleaks-and-detect-private-key-in-pre-commit-ruff -->
+- [ ] Coverage `fail_under` 85; ruff `C90` complexity limit 10 (declared, not implemented) <!-- spec-coverage-failunder-85-ruff-c90-complexity-limit-10 -->
+- [ ] Profiling and screenshot capture of the application (declared, not implemented) <!-- spec-profiling-and-screenshot-capture-of-the-applicatio -->
+
+<!-- jira-sync:end -->
+
 ## 1. Purpose and scope
 
 The system produces a two-class (`helmet`, `no_helmet`) YOLOv8 object detector from unlabeled photos. A local

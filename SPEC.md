@@ -415,3 +415,181 @@ Manual checks (for requirements without tests):
 12. Should the notebook's label preview apply the same head crop as `build-dataset`? It calls
     `build_valid_items` without `head_crop_max_aspect_ratio`, which defaults to `None` (`build.py:38`).
 13. Is `legacy/agent_scaffolding_cpp_qt/` still needed? `README.md` calls it "safe to remove entirely".
+
+## Screenshots of requirements
+
+### FR-1 - The system shall load configuration from the YAML file given by --config, or from
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-2 - The system shall apply each --set key.path=value override to the loaded data before validation
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-3 - The system shall reject an override without = with ValueError
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-4 - The system shall validate the merged configuration against typed models, and labeling.systemprompt
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-5 - The system shall resolve relative paths in the configuration against the project root (Path(file).resolve().pa…
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-6 - The system shall provide the subcommands label, build-dataset, train, evaluate, infer and
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-7 - The system shall seed Python random and NumPy with seed before running a subcommand
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-8 - The system shall log the message and return exit code 1 when loading the config raises
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-9 - The pipeline subcommand shall run label, build-dataset, train and evaluate in that order,
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-10 - The system shall collect the files matching paths.imagesdir/paths.imageglob in sorted order, keep
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-11 - The system shall start llama-server with --host, --port, --ctx-size, --n-gpu-layers,
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-12 - The system shall raise RuntimeError with download and PATH instructions when the server binary cannot be launc…
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-13 - The system shall poll GET /health every 2 s until it returns HTTP 200. It shall raise RuntimeError
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-14 - For each image the system shall send POST /v1/chat/completions with the system prompt, a user
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-15 - On exit from the backend context, and before a restart, the system shall terminate the server
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-16 - The system shall parse a model response by stripping a leading or trailing markdown code fence,
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-17 - The system shall copy the first present alias of bbox2d, box or box2d into bbox when bbox is missing, and shal…
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-18 - When labeling through LlamaCppServerBackend, the system shall map every 4-element numeric bbox from
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-19 - The system shall skip images whose file stem is already in labelsraw.json without an error
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-20 - The system shall store, for every processed image, an entry keyed by file stem with imagepath,
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-21 - After 3 consecutive failed requests, the system shall restart the backend and retry the current
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-22 - The system shall write labelsraw.json (UTF-8, indent 2, ensureascii=False) every
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-23 - The system shall skip, and count as skipped, every image with no detections, with an image file
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-24 - The system shall drop a detection whose lower-cased, stripped label is not in classmap or whose bbox is not a …
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-25 - When dedupiouthreshold is not null, the system shall drop each detection whose IoU with an
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-26 - The system shall clamp each box to the image bounds and drop it if its width or height is zero or negative aft…
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-27 - When headcropmaxaspectratio is not null, the system shall replace a clamped box whose
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-28 - The system shall write each remaining box as <classid> <cx> <cy> <w> <h> with values normalised to
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-29 - The system shall split the valid items by shuffling a copy with random.Random(seed) and putting the
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-30 - The system shall copy each image to dataset/<split>/images/<stem><ext>, write its lines to
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-31 - When no valid item remains, the system shall log an error, write no dataset files and return the statistics
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-32 - The build-dataset subcommand shall raise FileNotFoundError when labelsraw.json is missing or
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-33 - The system shall raise FileNotFoundError when dataset/data.yaml is missing. Otherwise it shall
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-34 - The system shall use runs/<experimentname>/weights/best.pt as the default weights for evaluate and infer when …
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-35 - The system shall raise FileNotFoundError when the weights file is missing. Otherwise it shall run
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-36 - With --analyze-errors, the system shall predict every validation image at evaluate.conf. It shall
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-37 - The infer subcommand shall expand the image glob and raise an error when the weights are missing
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-38 - The system shall resolve device auto to CUDA device 0 when torch.cuda.isavailable(), otherwise
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-39 - The system shall log to stdout in the format HH:MM:SS [LEVEL] logger: message at INFO, and shall not add a han…
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-40 - scripts/checkbeforepush.py shall extract the ruff, mypy and pytest commands from
+
+> Screenshot pending: this requirement is about the repository tooling (recipe.ps1, git hooks, CI), which does run on this machine; it will be captured in a later pass.
+
+### FR-41 - scripts/enforcebranchpolicy.py shall report branches other than release, dev and test
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-42 - scripts/buildreleaseartifact.py shall rebuild release/ with a PyInstaller one-file executable
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-43 - scripts/collectqualitymetrics.py shall report test pass rate, coverage, radon complexity and
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
+
+### FR-44 - scripts/installdependencies.py shall install the package (--dev: with dev extras), regenerate
+
+> Screenshot skipped: the code does not run here - the project runs on PyTorch-class libraries and trained weights, and torch is not installed here (multi-gigabyte); requirements whose code does not need torch will be revisited in a later pass.
